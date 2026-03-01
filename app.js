@@ -355,7 +355,19 @@
     };
     tick();
     setInterval(tick, 1000); // every second for live clock + countdown
-    setInterval(() => { highlightCurrent(); renderPrayerBar(); }, 60000);
+    setInterval(() => {
+      const n = new Date();
+      highlightCurrent();
+      renderPrayerBar();
+      // ── Midnight Auto-Refresh ──
+      if (localStorage.getItem(KEYS.date) !== todayKey()) {
+        console.log('New day started, refreshing...');
+        checkReset();
+        fetchPrayers(); // Fetch new timings for the new day
+        renderDayInfo();
+        renderQuote();
+      }
+    }, 60000);
   }
   function renderDate() { document.getElementById('currentDate').textContent = new Intl.DateTimeFormat('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).format(new Date()); }
   function renderDayInfo() { const d = new Date().getDay(); document.getElementById('dayName').textContent = DAY_NAMES[d]; document.getElementById('dayWorkout').textContent = 'تمرين اليوم: ' + WORKOUTS[d]; }
@@ -631,8 +643,9 @@
     let shouldRemindWater = false;
     if (isFastDay) {
       if (!sunUp) {
-        // Night time of a fasting day (Mon/Thu): Remind every hour at the top of the hour
-        if (now.getMinutes() === 0) shouldRemindWater = true;
+        // Night time of a fasting day (Mon/Thu): 
+        // Remind every 30 minutes (00 and 30) to ensure hydration before Fajr
+        if (now.getMinutes() === 0 || now.getMinutes() === 30) shouldRemindWater = true;
       }
       // If fasting (sun is up): no reminders.
     } else {
