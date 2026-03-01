@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الجدول اليومي الشامل</title>
+    <meta name="description" content="جدول يومي شامل — عبادات، رياضة، دراسة">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f1115">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+</head>
+
+<body>
+    <div class="app" id="app">
+
+        <header class="header">
+            <h1 class="header__title">الجدول اليومي الشامل</h1>
+            <p class="header__subtitle">العبادات · الرياضة · الدراسة</p>
+            <div class="header__meta">
+                <span id="currentDate"></span>
+                <span class="hijri-date" id="hijriDate"></span>
+                <span class="header__time" id="liveTime"></span>
+                <div class="streak-badge" id="streakBadge" title="أيام متتالية">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e3b341" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                    </svg>
+                    <span id="streakVal">0</span>
+                </div>
+                <button class="notif-toggle" id="notifToggle" title="تفعيل الإشعارات">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                    </svg>
+                    <span id="notifLabel">إشعارات</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Prayer Times from API -->
+        <div class="prayer-bar" id="prayerBar">
+            <div class="prayer-item" data-prayer="Fajr">
+                <div class="prayer-item__name">الفجر</div>
+                <div class="prayer-item__time" id="pFajr">--:--</div>
+            </div>
+            <div class="prayer-item" data-prayer="Sunrise">
+                <div class="prayer-item__name">الشروق</div>
+                <div class="prayer-item__time" id="pSunrise">--:--</div>
+            </div>
+            <div class="prayer-item" data-prayer="Dhuhr">
+                <div class="prayer-item__name">الظهر</div>
+                <div class="prayer-item__time" id="pDhuhr">--:--</div>
+            </div>
+            <div class="prayer-item" data-prayer="Asr">
+                <div class="prayer-item__name">العصر</div>
+                <div class="prayer-item__time" id="pAsr">--:--</div>
+            </div>
+            <div class="prayer-item" data-prayer="Maghrib">
+                <div class="prayer-item__name">المغرب</div>
+                <div class="prayer-item__time" id="pMaghrib">--:--</div>
+            </div>
+            <div class="prayer-item" data-prayer="Isha">
+                <div class="prayer-item__name">العشاء</div>
+                <div class="prayer-item__time" id="pIsha">--:--</div>
+            </div>
+        </div>
+
+        <!-- Countdown Bar -->
+        <div class="countdown-bar" id="countdownBar" style="display:none">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+            </svg>
+            <span id="countdownText"></span>
+        </div>
+
+        <div class="quote-bar" id="quoteBar">
+            <p class="quote-bar__text" id="quoteText"></p>
+            <p class="quote-bar__src" id="quoteSrc"></p>
+        </div>
+
+        <div class="stats">
+            <div class="stat stat--green">
+                <div class="stat__val" id="pctIslamic">0%</div>
+                <div class="stat__label">العبادات</div>
+            </div>
+            <div class="stat stat--amber">
+                <div class="stat__val" id="pctAthletic">0%</div>
+                <div class="stat__label">الرياضة</div>
+            </div>
+            <div class="stat stat--blue">
+                <div class="stat__val" id="pctStudent">0%</div>
+                <div class="stat__label">الدراسة</div>
+            </div>
+            <div class="stat stat--sleep" id="sleepStat" title="ساعات النوم الفعلية حسب مواعيد الصلاة">
+                <div class="stat__val" id="sleepHours">—</div>
+                <div class="stat__label">النوم</div>
+            </div>
+        </div>
+
+        <div class="progress-section">
+            <div class="ring-wrap">
+                <svg class="ring-svg" viewBox="0 0 100 100">
+                    <defs>
+                        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#56d364" />
+                            <stop offset="50%" stop-color="#e3b341" />
+                            <stop offset="100%" stop-color="#79c0ff" />
+                        </linearGradient>
+                    </defs>
+                    <circle class="ring-bg" cx="50" cy="50" r="44" />
+                    <circle class="ring-fill" id="ringFill" cx="50" cy="50" r="44" />
+                </svg>
+                <div class="ring-text"><span id="overallPct">0</span><span>%</span></div>
+            </div>
+            <div class="progress-label">التقدم الكلي لليوم</div>
+            <div class="remaining-count" id="remainingCount"></div>
+        </div>
+
+        <div class="day-info">
+            <div class="day-info__name" id="dayName"></div>
+            <div class="day-info__workout" id="dayWorkout"></div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" data-filter="all"><span class="tab__dot tab__dot--all"></span>الكل</button>
+            <button class="tab" data-filter="islamic"><span class="tab__dot tab__dot--green"></span>العبادات</button>
+            <button class="tab" data-filter="athletic"><span class="tab__dot tab__dot--amber"></span>الرياضة</button>
+            <button class="tab" data-filter="student"><span class="tab__dot tab__dot--blue"></span>الدراسة</button>
+        </div>
+
+        <!-- Fasting Mode -->
+        <div class="fast-toggle" id="fastToggle">
+            <div class="fast-switch"></div>
+            <span class="fast-toggle__label">وضع الصيام — إخفاء الوجبات</span>
+        </div>
+
+        <div class="schedule" id="schedule"></div>
+
+        <div class="water-section">
+            <div class="water-section__title">تتبع شرب الماء — 3 لتر يومياً</div>
+            <div class="water-row">
+                <div class="water-dots" id="waterDots"></div>
+                <span class="water-count" id="waterCount">0/12</span>
+            </div>
+        </div>
+
+        <div class="weekly-section">
+            <div class="weekly-section__title">أهداف أسبوعية</div>
+            <div class="weekly-grid" id="weeklyGrid"></div>
+        </div>
+
+        <div class="calendar-section">
+            <div class="calendar-header">
+                <div class="calendar-section__title">التقويم الشهري</div>
+                <div class="calendar-legend">
+                    <span class="cal-dot cal-dot--high"></span>80%+
+                    <span class="cal-dot cal-dot--mid"></span>50%+
+                    <span class="cal-dot cal-dot--low"></span>أقل
+                    <span class="cal-dot cal-dot--none"></span>لا يوجد
+                </div>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
+
+        <div class="reset-area">
+            <button class="reset-btn" id="resetBtn">إعادة تعيين اليوم</button>
+        </div>
+
+    </div>
+
+    <!-- Focus Mode Overlay -->
+    <div class="focus-overlay" id="focusOverlay">
+        <div class="focus-card">
+            <h2 class="focus-card__title" id="focusTitle"></h2>
+            <p class="focus-card__desc" id="focusDesc"></p>
+            <p class="focus-card__time" id="focusTime"></p>
+            <button class="focus-card__close" id="focusClose">إغلاق</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
