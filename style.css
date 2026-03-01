@@ -29,11 +29,16 @@
 *::after {
   margin: 0;
   padding: 0;
-  box-sizing: border-box
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  outline: none !important;
+  /* Disables focus outlines for cleaner UI */
 }
 
 html {
-  scroll-behavior: smooth
+  scroll-behavior: smooth;
+  -webkit-touch-callout: none;
+  /* Prevents long-press menu on mobile links */
 }
 
 body {
@@ -44,6 +49,13 @@ body {
   min-height: 100vh;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  /* Disable text selection */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  /* Remove blue tap highlight on mobile */
+  -webkit-tap-highlight-color: transparent;
 }
 
 ::-webkit-scrollbar {
