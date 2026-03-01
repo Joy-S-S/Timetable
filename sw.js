@@ -1,18 +1,18 @@
 const CACHE = 'timetable-v4';
 const ASSETS = [
-    '/',
-    '/index.html',
-    '/style.css',
-    '/app.js',
-    '/manifest.json',
-    '/favicon.png',
-    '/icon-192.png',
-    '/icon-512.png',
-    '/adhan.mp3',
-    '/adhan-fajr.mp3',
-    '/task-done.mp3',
-    '/notification.mp3',
-    '/alarm.mp3'
+    './',
+    'index.html',
+    'style.css',
+    'app.js',
+    'manifest.json',
+    'favicon.png',
+    'icon-192.png',
+    'icon-512.png',
+    'adhan.mp3',
+    'adhan-fajr.mp3',
+    'task-done.mp3',
+    'notification.mp3',
+    'alarm.mp3'
 ];
 
 self.addEventListener('install', e => {
