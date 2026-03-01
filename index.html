@@ -17,12 +17,12 @@
     <div class="app" id="app">
 
         <header class="header">
+            <span class="header__time" id="liveTime"></span>
             <h1 class="header__title">الجدول اليومي الشامل</h1>
             <p class="header__subtitle">العبادات · الرياضة · الدراسة</p>
             <div class="header__meta">
                 <span id="currentDate"></span>
                 <span class="hijri-date" id="hijriDate"></span>
-                <span class="header__time" id="liveTime"></span>
                 <div class="streak-badge" id="streakBadge" title="أيام متتالية">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e3b341" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -69,14 +69,10 @@
             </div>
         </div>
 
-        <!-- Countdown Bar -->
-        <div class="countdown-bar" id="countdownBar" style="display:none">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-            </svg>
-            <span id="countdownText"></span>
+        <!-- Status Ticker (Now & Next) -->
+        <div class="status-ticker" id="statusTicker" style="display:none">
+            <div class="status-ticker__item now" id="tickerNow"></div>
+            <div class="status-ticker__item next" id="tickerNext"></div>
         </div>
 
         <div class="quote-bar" id="quoteBar">

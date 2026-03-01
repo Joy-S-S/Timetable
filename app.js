@@ -335,23 +335,61 @@
     }
     return bestTask ? { task: bestTask, diff: bestDiff } : null;
   }
-  function renderCountdown() {
-    const el = document.getElementById('countdownBar');
+  function getCurrentTask() {
+    const m = new Date().getHours() * 60 + new Date().getMinutes();
+    const isFasting = getIsFasting();
+    return SCHEDULE.find(t => {
+      const s = toMin(t.time), e = toMin(t.end);
+      const isNow = e < s ? m >= s || m < e : m >= s && m < e;
+      if (!isNow) return false;
+      const isMeal = ['breakfast', 'lunch', 'dinner', 'snack'].includes(t.id);
+      if (isFasting && isMeal) return false;
+      if (!isFasting && t.fastOnly) return false;
+      return true;
+    });
+  }
+  function renderStatusTicker() {
+    const el = document.getElementById('statusTicker');
+    const tNow = document.getElementById('tickerNow');
+    const tNext = document.getElementById('tickerNext');
     if (!el) return;
-    const next = getNextTask();
-    if (!next) { el.style.display = 'none'; return; }
-    el.style.display = 'flex';
-    const h = Math.floor(next.diff / 60), mins = next.diff % 60;
-    const timeStr = h > 0 ? `${h} س ${mins} د` : `${mins} دقيقة`;
-    document.getElementById('countdownText').textContent = `${next.task.title} — بعد ${timeStr}`;
-    el.classList.toggle('countdown--urgent', next.diff <= 10);
+
+    const cur = getCurrentTask();
+    const nxt = getNextTask();
+
+    if (!cur && !nxt) { el.style.display = 'none'; return; }
+    el.style.display = 'block';
+
+    if (cur) {
+      tNow.style.display = 'flex';
+      tNow.style.alignItems = 'center';
+      tNow.style.justifyContent = 'center';
+      tNow.style.gap = '10px';
+      const isDoneNow = done[cur.id];
+      tNow.innerHTML = `
+        <div class="ticker-content">
+          <span class="ticker-label">الآن:</span> <span class="ticker-title">${cur.title}</span>
+        </div>
+        <button class="ticker-check${isDoneNow ? ' is-done' : ''}" data-id="${cur.id}" title="${isDoneNow ? 'تم الإكمال' : 'إتمام المهمة'}">
+          ${CHK}
+        </button>
+      `;
+    } else { tNow.style.display = 'none'; }
+
+    if (nxt) {
+      tNext.style.display = 'block';
+      const h = Math.floor(nxt.diff / 60), mins = nxt.diff % 60;
+      const timeStr = h > 0 ? `${h} س ${mins} د` : `${mins} دقيقة`;
+      tNext.innerHTML = `<span class="ticker-label">التالي:</span> <span class="ticker-title">${nxt.task.title}</span> — بعد ${timeStr}`;
+      el.classList.toggle('status-ticker--urgent', nxt.diff <= 10);
+    } else { tNext.style.display = 'none'; }
   }
 
   function startClock() {
     const tick = () => {
       const n = new Date();
       document.getElementById('liveTime').textContent = to12h(String(n.getHours()).padStart(2, '0') + ':' + String(n.getMinutes()).padStart(2, '0'));
-      renderCountdown();
+      renderStatusTicker();
     };
     tick();
     setInterval(tick, 1000); // every second for live clock + countdown
@@ -424,8 +462,7 @@
         if (bar) bar.style.width = pct + '%';
       }
     });
-    const c = document.querySelector('.schedule-item.is-now:not(.hidden)');
-    if (c) setTimeout(() => c.scrollIntoView({ behavior: 'smooth', block: 'center' }), 600);
+    // Auto-scroll disabled per user request
   }
 
   function updateProgress() {
@@ -678,7 +715,7 @@
         if (navigator.vibrate) navigator.vibrate(50); // success tap
         SFX.done.cloneNode().play().catch(() => { });
       }
-      save(); updateProgress();
+      save(); updateProgress(); renderStatusTicker();
     });
     document.getElementById('schedule').addEventListener('dblclick', e => { const item = e.target.closest('.schedule-item'); if (!item) return; const t = SCHEDULE.find(x => x.id === item.dataset.id); if (t) openFocus(t); });
     document.querySelectorAll('.tab').forEach(tab => { tab.addEventListener('click', () => { document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); filter = tab.dataset.filter; document.querySelectorAll('.schedule-item').forEach(el => { el.classList.toggle('hidden', filter !== 'all' && el.dataset.cat !== filter); }); }); });
@@ -707,6 +744,18 @@
       renderSchedule();
       updateProgress();
     });
+    document.getElementById('statusTicker').addEventListener('click', e => {
+      const btn = e.target.closest('.ticker-check'); if (!btn) return;
+      const id = btn.dataset.id;
+      if (done[id]) {
+        delete done[id];
+      } else {
+        done[id] = true;
+        if (navigator.vibrate) navigator.vibrate(50);
+        SFX.done.cloneNode().play().catch(() => { });
+      }
+      save(); renderSchedule(); updateProgress(); renderStatusTicker();
+    });
     document.getElementById('focusClose').addEventListener('click', closeFocus);
     document.getElementById('focusOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeFocus(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFocus(); });
@@ -716,7 +765,7 @@
     loadStreak(); checkReset(); loadState(); renderDate(); startClock(); renderQuote(); renderDayInfo();
     renderSchedule(); renderWater(); renderWeekly(); updateProgress(); renderCalendar();
     setupNotif(); fetchPrayers(); bindEvents(); highlightCurrent();
-    renderStreakBadge(); renderCountdown();
+    renderStreakBadge(); renderStatusTicker();
     setInterval(checkNotifs, 60000);
     checkNotifs(); // first immediate check (adhan/notif) at page open
   }
